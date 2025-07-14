@@ -15,14 +15,14 @@ pipeline {
             }
         }
         
+ 
 
         stage('🔨 Build ') {
             steps {
-                  sh './gradlew build -x test -x spotlessCheck -x spotlessJavaCheck -x spotlessApply'
+               sh 'ant build'
             }
         }
         
-    
 
 
         stage('🐳 Docker Build') {
@@ -52,10 +52,13 @@ pipeline {
                       set +a
                       aws ecr get-login-password --region "$REGION" | docker login --username AWS --password-stdin "$ECR_REPO"
                     '''
-                sh 'DYNAMIC_IMAGE_TAG=${DYNAMIC_IMAGE_TAG} components/scripts/DAST_Zap_Scan.sh'
-                //sh 'nohup DYNAMIC_IMAGE_TAG=${DYNAMIC_IMAGE_TAG} components/scripts/DAST_Zap_Scan.sh > zap_bg.log 2>&1 &'
+
+                sh'nohup env DYNAMIC_IMAGE_TAG=${DYNAMIC_IMAGE_TAG} components/scripts/DAST_Zap_Scan.sh > zap_bg_${BUILD_NUMBER}.log 2>&1 &'
+                //sh '''bash -c "DYNAMIC_IMAGE_TAG=$DYNAMIC_IMAGE_TAG components/scripts/DAST_Zap_Scan.sh /bodgeit"'''
             }
         }
+
+        
     }
 
     post {
